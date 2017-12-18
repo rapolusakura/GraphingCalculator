@@ -2946,8 +2946,9 @@ public class GUI extends JFrame
                 y=Double.parseDouble(parsedY);            
                 Y=getY(y);
                 Points[i][0]=i;
-                Points[i][1]=Y;
+                Points[i][1]=Y; 
             }
+
             i++;
         }
         //Draw all the points
@@ -2971,7 +2972,8 @@ public class GUI extends JFrame
         //Set drawing parameters
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
-        double y;double x;int length=graph_screen.getWidth();int Y;String parsedY;               
+        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY;   
+        double previous = -1; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -2981,15 +2983,19 @@ public class GUI extends JFrame
         for (int i=0;i<=length;)
         {
             x=((1.0*i/length)*(xmax-xmin))+xmin;
-            //this is the difference in the code to get the first derivative, using the AROC formula
-            parsedY=expression.solve((expression.solve(someExpression,x-0.001) + "-" + expression.solve(someExpression, x+0.001))+"/"+(x-0.001 - (x+0.001)), x);
+            //changing the parsed value to the first derivative using the AROC formula
+            parsedY = expression.solveFirstDerivative(someExpression, x); 
             if (parsedY.equals("Error")==false)
             {
-                y=Double.parseDouble(parsedY);            
+                y=Double.parseDouble(parsedY);  
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
+                if(y*previous<=0) {
+                		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
+            		}
             }
+            previous = y; 
             i++;
         }
         //Draw all the points
@@ -3013,7 +3019,8 @@ public class GUI extends JFrame
         //Set drawing parameters
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
-        double y;double x;int length=graph_screen.getWidth();int Y;String parsedY;               
+        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY;       
+        double previous=-1; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -3023,15 +3030,20 @@ public class GUI extends JFrame
         for (int i=0;i<=length;)
         {
             x=((1.0*i/length)*(xmax-xmin))+xmin;
-            //this is the difference in the code to get the first derivative, using the AROC formula
-            parsedY=expression.solve((expression.solve(someExpression,x-0.001) + "-" + expression.solve(someExpression, x+0.001))+"/"+(x-0.001 - (x+0.001)), x);
+            //apply AROC to values on the 1st derivative graph
+            parsedY = expression.solveSecondDerivative(someExpression, x); 
             if (parsedY.equals("Error")==false)
             {
+ 
                 y=Double.parseDouble(parsedY);            
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
+                if(y*previous<=0) {
+            		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
+        		}
             }
+            previous = y; 
             i++;
         }
         //Draw all the points
@@ -3206,16 +3218,13 @@ public class GUI extends JFrame
         clearGraph();
         Color[] colors ={Color.red,Color.blue,Color.green,Color.orange,Color.cyan,Color.magenta,Color.pink};
         saveExpression();        
-        for (int i=0;i<5;i++)
-        {
-            drawAxis();
-            drawGrid();
-            if(getCertainExpression(i).length()>0)
-            graphExpression(getCertainExpression(i),colors[i]);
-            graphFirstDerivative(getCertainExpression(i),colors[i+1]); 
-            //graphSecondDerivative(getCertainExpression(i),colors[i+2]); 
-            
-        }   
+        drawAxis();
+        drawGrid();
+        if(getCertainExpression(0).length()>0) {
+		    graphExpression(getCertainExpression(0),colors[0]);
+		    graphFirstDerivative(getCertainExpression(0),colors[1]); 
+		    graphSecondDerivative(getCertainExpression(0),colors[2]); 
+        }
     }
 
     //Check if expression is valid, if not turn the text feild red until the expression makes sense
