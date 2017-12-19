@@ -2903,34 +2903,10 @@ public class GUI extends JFrame
     private void graphExpression(String someExpression, Color c)
     {
         setColors(Color.red,Color.blue,Color.green,Color.orange,Color.cyan,Color.magenta,Color.pink);
-        switch(Equation.getSelectedIndex()+1)
-        {
-            case 1:
-                fx=getExpression();
-                break;
-            case 2:
-                gx=getExpression();
-                break;
-            case 3:
-                ax=getExpression();
-                break;
-            case 4:
-                bx=getExpression();
-                break;
-            case 5:
-                cx=getExpression();
-                break;
-            case 6:
-                dx=getExpression();
-                break;
-            case 7:
-                ex=getExpression();
-                break;
-        }
         //Set drawing parameters
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
-        double y;double x;int length=graph_screen.getWidth();int Y;String parsedY;               
+        double y;double x;int length=graph_screen.getWidth();int Y;String parsedY; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -2939,7 +2915,7 @@ public class GUI extends JFrame
         //Get all the points on the line into an array
         for (int i=0;i<=length;)
         {
-            x=((1.0*i/length)*(xmax-xmin))+xmin;
+            x = ((1.0*(i)/length)*(xmax-xmin))+xmin;
             parsedY=expression.solve(someExpression,x);
             if (parsedY.equals("Error")==false)
             {
@@ -2948,8 +2924,20 @@ public class GUI extends JFrame
                 Points[i][0]=i;
                 Points[i][1]=Y; 
             }
-
             i++;
+        }
+        //checks for a hole
+        for(int i=-10; i<=10; i++) { 
+        		parsedY=expression.solve(someExpression,(double) i);
+        		if(parsedY.equals("Error")) {
+        			double smallX = i-0.001; 
+            		double bigX = i+0.001; 
+            		if(!expression.solve(someExpression, smallX).equals("Error")&&!expression.solve(someExpression, bigX).equals("Error")) {
+            			Double gridValue = (i-xmin)/(xmax-xmin)*length;
+            			graphics.fill3DRect(gridValue.intValue(), getY(Double.parseDouble(expression.solve(someExpression,smallX)))-5, 10, 10, true);
+            		} 
+        		}
+        	
         }
         //Draw all the points
         for (int i=3;i<Points.length;i+=1)
@@ -2972,8 +2960,8 @@ public class GUI extends JFrame
         //Set drawing parameters
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
-        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY;   
-        double previous = -1; 
+        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY, after;   
+        double previous = -1, nextX; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -2983,15 +2971,17 @@ public class GUI extends JFrame
         for (int i=0;i<=length;)
         {
             x=((1.0*i/length)*(xmax-xmin))+xmin;
+            nextX = ((1.0*(i+1)/length)*(xmax-xmin))+xmin;
             //changing the parsed value to the first derivative using the AROC formula
             parsedY = expression.solveFirstDerivative(someExpression, x); 
+            after = expression.solveFirstDerivative(someExpression, nextX); 
             if (parsedY.equals("Error")==false)
             {
                 y=Double.parseDouble(parsedY);  
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
-                if(y*previous<=0) {
+                if(!after.equals("Error") && Double.parseDouble(after)*previous<0) {
                 		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
             		}
             }
@@ -3019,8 +3009,8 @@ public class GUI extends JFrame
         //Set drawing parameters
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
-        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY;       
-        double previous=-1; 
+        double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY, after;       
+        double previous=-1, nextX; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -3030,16 +3020,17 @@ public class GUI extends JFrame
         for (int i=0;i<=length;)
         {
             x=((1.0*i/length)*(xmax-xmin))+xmin;
+            nextX = x+0.001; 
             //apply AROC to values on the 1st derivative graph
             parsedY = expression.solveSecondDerivative(someExpression, x); 
+            after = expression.solveSecondDerivative(someExpression, nextX); 
             if (parsedY.equals("Error")==false)
             {
- 
                 y=Double.parseDouble(parsedY);            
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
-                if(y*previous<=0) {
+                if(!after.equals("Error") && (Math.floor(previous * 1000)/1000)!=0.0 && (Math.floor(Double.parseDouble(after) * 1000)/1000)!=0.0 && Double.parseDouble(after)*previous<0) {
             		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
         		}
             }
