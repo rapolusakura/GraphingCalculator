@@ -10,8 +10,9 @@ public class Parser
 {
    private String input,output,converted,Precision_str;
    private int
+   
    //precision (maximum amount of digits after decimal place)
-   precision=16,
+   precision=16,  
    //Mode radian(1) or degree(2)
    mode=1;
    private double xValue,
@@ -40,7 +41,7 @@ public class Parser
    //Characters of variables:
    x='x';
    //------------------------
-
+   
    //constructor for ExpressionReader Object
    public Parser()
    {
@@ -59,7 +60,36 @@ public class Parser
        removePars();
        //return final result
        output=toString(evaluate(input+"="));
+       //System.out.println(x + " " + output);
        return output;
+   }
+   
+   public String solveFirstDerivative(String expression, Double x) {
+	   input=(solve(expression, x) + "-" + solve(expression, x+0.001))+"/"+(-0.001);
+       xValue=x;
+       //cleanse input
+       purify();
+       //remove parentheses
+       removePars();
+       //return final result
+       output=toString(evaluate(input+"="));
+       return output;
+   }
+   
+   public String solveSecondDerivative(String expression, Double x) {
+	   String minY, maxY; 
+	   minY = solveFirstDerivative(expression, x); 
+	   maxY = solveFirstDerivative(expression, x+0.001); 
+	   input=minY+"-"+maxY+"/"+(-0.001);
+       xValue=x;
+       //cleanse input
+       purify();
+       //remove parentheses
+       removePars();
+       //return final result
+       output=toString(evaluate(input+"="));
+       return output;
+	   
    }
    //throw out parentheses
    private void removePars()
@@ -227,7 +257,7 @@ public class Parser
        return result;
        }catch(Exception e)
        {
-           return Math.sqrt(-1);
+    	   		return Math.sqrt(-1);
        }
    }
    //parseNumber...parseDouble does not suffice :P
@@ -365,7 +395,7 @@ public class Parser
                }
        return result;
    }
-   //detect negatives inside functions... sin(-1)...etc
+   //detect negatives inside functions... sin(-1)...et
    private boolean confirmNegative(String Num,String expression,int i)
    {
         boolean result=false;if
