@@ -2929,11 +2929,15 @@ public class GUI extends JFrame
         //checks for a hole
         for(int i=-10; i<=10; i++) { 
         		parsedY=expression.solve(someExpression,(double) i);
+        		//checks if i returns an error, if the values adjacent to it are not errors, then the current 
+        		//value is a hole 
         		if(parsedY.equals("Error")) {
         			double smallX = i-0.001; 
             		double bigX = i+0.001; 
             		if(!expression.solve(someExpression, smallX).equals("Error")&&!expression.solve(someExpression, bigX).equals("Error")) {
+            			//converts from x-value to pixel value
             			Double gridValue = (i-xmin)/(xmax-xmin)*length;
+            			//plots the hole as a red rectangle
             			graphics.fill3DRect(gridValue.intValue(), getY(Double.parseDouble(expression.solve(someExpression,smallX)))-5, 10, 10, true);
             		} 
         		}
@@ -2961,7 +2965,7 @@ public class GUI extends JFrame
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
         double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY, after;   
-        double previous = -1, nextX; 
+        double previous = Double.parseDouble(expression.solveFirstDerivative(someExpression, xmin)), nextX; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -2969,18 +2973,20 @@ public class GUI extends JFrame
         xmax=Double.parseDouble(Xmax.getText());
         //Get all the points on the line into an array
         for (int i=0;i<=length;)
-        {
+        {	//converts pixel value to calculable x value 
             x=((1.0*i/length)*(xmax-xmin))+xmin;
             nextX = ((1.0*(i+1)/length)*(xmax-xmin))+xmin;
-            //changing the parsed value to the first derivative using the AROC formula
+            //calculates value of first derivative using the AROC formula
             parsedY = expression.solveFirstDerivative(someExpression, x); 
             after = expression.solveFirstDerivative(someExpression, nextX); 
+            //adds a point if the Y value is not an error
             if (parsedY.equals("Error")==false)
             {
                 y=Double.parseDouble(parsedY);  
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
+                //checks for relative extrema, product of Y-values before and after current iteration have to be non-errors and <0 (must change signs) 
                 if(!after.equals("Error") && Double.parseDouble(after)*previous<0) {
                 		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
             		}
@@ -3010,7 +3016,7 @@ public class GUI extends JFrame
         BasicStroke graphStroke=new BasicStroke(graphWidth,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND);
         Graphics2D graphics = (Graphics2D) graph_screen.getGraphics();        
         double y=-1;double x;int length=graph_screen.getWidth();int Y;String parsedY, after;       
-        double previous=-1, nextX; 
+        double previous=Double.parseDouble(expression.solveSecondDerivative(someExpression, xmin)), nextX; 
         graphics.setColor(c);
         graphics.setStroke(graphStroke);
         int[][] Points = new int[length+1][2];
@@ -3021,7 +3027,7 @@ public class GUI extends JFrame
         {
             x=((1.0*i/length)*(xmax-xmin))+xmin;
             nextX = x+0.001; 
-            //apply AROC to values on the 1st derivative graph
+            //use AROC twice to calculate second derivative points
             parsedY = expression.solveSecondDerivative(someExpression, x); 
             after = expression.solveSecondDerivative(someExpression, nextX); 
             if (parsedY.equals("Error")==false)
@@ -3030,6 +3036,11 @@ public class GUI extends JFrame
                 Y=getY(y);
                 Points[i][0]=i;
                 Points[i][1]=Y;
+                /*adds a point of inflection if the value after the current iteration is not an error
+                 * and the values before and after are not also 0 and the previous and next 
+                 * iteration values multiplied together are less than 0 (must have
+                 * changed signs) 
+                 */
                 if(!after.equals("Error") && (Math.floor(previous * 1000)/1000)!=0.0 && (Math.floor(Double.parseDouble(after) * 1000)/1000)!=0.0 && Double.parseDouble(after)*previous<0) {
             		graphics.fill3DRect(i, getY(Double.parseDouble(expression.solve(someExpression,x))), 6, 6, true);
         		}
