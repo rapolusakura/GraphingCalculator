@@ -65,7 +65,7 @@ public class Parser
    }
    
    public String solveFirstDerivative(String expression, Double x) {
-	   input=(solve(expression, x) + "-" + solve(expression, x+0.001))+"/"+(-0.001);
+	   input=(solve(expression, x-0.001) + "-" + solve(expression, x+0.001))+"/"+(-0.002);
        xValue=x;
        //cleanse input
        purify();
@@ -78,9 +78,9 @@ public class Parser
    
    public String solveSecondDerivative(String expression, Double x) {
 	   String minY, maxY; 
-	   minY = solveFirstDerivative(expression, x); 
+	   minY = solveFirstDerivative(expression, x-0.001); 
 	   maxY = solveFirstDerivative(expression, x+0.001); 
-	   input=minY+"-"+maxY+"/"+(-0.001);
+	   input=minY+"-"+maxY+"/"+(-0.002);
        xValue=x;
        //cleanse input
        purify();
